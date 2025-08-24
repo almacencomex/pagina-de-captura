@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Captura de pedidos — Pinturas Peolsa</title>
+  <style>
+    :root{ --bg:#0b102e; --panel:#121939; --ink:#eaf0ff; --muted:#aab7ff; --accent:#fecf3a; }
+    html,body{margin:0; background:var(--bg); color:var(--ink); font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;}
+    header{padding:12px 16px; background:linear-gradient(90deg,var(--panel), #1b2555); position:sticky; top:0; z-index:10}
+    header h1{margin:0; font-size:16px; font-weight:700}
+    main{display:grid; grid-template-columns: 1fr 420px; gap:16px; padding:16px; max-width:1200px; margin:0 auto}
+    .card{background:#0e1440; border:1px solid #22306a; border-radius:14px; padding:14px}
+    h2{font-size:14px; margin:0 0 10px; color:#cfe0ff}
+    label{display:block; font-size:12px; margin:8px 0 4px; color:#c3cffd}
+    input[type="text"], input[type="tel"], input[type="number"], select, textarea{
+      width:100%; padding:10px; border-radius:10px; border:1px solid #2a3b85; background:#0b123a; color:var(--ink); font-size:14px;
+    }
+    textarea{min-height:80px; resize:vertical}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+    .actions{display:flex; gap:10px; margin-top:12px}
+    button{padding:10px 14px; border-radius:10px; border:0; cursor:pointer; font-weight:700}
+    .primary{background:var(--accent)}
+    .ghost{background:#18235b; color:#e6ecff}
+    .ok{background:#1f2c63; color:white; display:none; margin-top:10px; padding:10px; border-radius:10px}
+    .err{background:#ff5b5b; color:white; display:none; margin-top:10px; padding:10px; border-radius:10px}
+    small{color:#90a0ff}
+    .inline{display:flex; align-items:center; gap:8px}
+    .note{font-size:12px; color:#b7c5ff}
+    .pill{display:inline-block; padding:4px 8px; background:#18235b; border-radius:999px; font-size:12px; margin-left:6px}
+    .muted{color:#aab7ff}
+    @media (max-width: 900px){ main{grid-template-columns: 1fr } }
+    .list{max-height:360px; overflow:auto; font-size:13px}
+    .row{display:flex; justify-content:space-between; gap:8px; padding:6px 8px; border-bottom:1px solid #1f2c63}
+    .tabs{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px}
+    .tab{padding:8px 10px; background:#18235b; border:1px solid #22306a; border-radius:10px; cursor:pointer; font-size:12px}
+    .tab.active{background:#fecf3a; color:#121212; border-color:#fecf3a; font-weight:800}
+    .remember{display:flex; gap:8px; align-items:center; margin-top:6px; color:#cfe0ff; font-size:12px}
+  </style>
+</head>
+<body>
+<header><h1>Captura de pedidos — Pinturas Peolsa</h1></header>
+
+<main>
+  <section class="card">
+    <h2>Selecciona sucursal</h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="remember">
+      <input type="checkbox" id="rememberChk" />
+      <label for="rememberChk">Recordar mi sucursal en este equipo</label>
+    </div>
+
+    <h2 style="margin-top:14px">Nuevo pedido <span class="pill" id="sucTag">Sin sucursal</span></h2>
+    <div class="grid">
+      <div>
+        <label>Cliente *</label>
+        <input id="cliente" type="text" placeholder="Nombre del cliente" required />
+      </div>
+      <div>
+        <label>Teléfono *</label>
+        <input id="telefono" type="tel" inputmode="numeric" pattern="[0-9 ]*" placeholder="10 dígitos" required />
+      </div>
+    </div>
+
+    <label>Dirección (calle y número) *</label>
+    <input id="direccion" type="text" placeholder="Ej. Av. Siempre Viva 123" required />
+
+    <div class="grid">
+      <div>
+        <label>Código Postal *</label>
+        <input id="cp" type="number" placeholder="5 dígitos" required />
+      </div>
+      <div>
+        <label>Tipo de recolección *</label>
+        <select id="recoleccion" required>
+          <option value="" disabled selected>Selecciona una opción</option>
+          <option value="otro_punto">Material se recolecta en otro punto</option>
+          <option value="sucursal">Material se recolecta en sucursal</option>
+          <option value="indistinta">Recolección indistinta</option>
+          <option value="urgente">Urgente</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Observaciones</label>
+    <textarea id="obs" placeholder="Referencias, rangos de horario, etc. (opcional)"></textarea>
+
+    <div class="actions">
+      <button class="primary" id="enviar" type="button">Enviar pedido</button>
+      <button class="ghost" id="limpiar" type="button">Limpiar</button>
+    </div>
+    <div id="ok" class="ok">✅ Pedido registrado. ¡Listo!</div>
+    <div id="err" class="err">⚠️ No se pudo registrar. Revisa tu conexión o intenta de nuevo.</div>
+    <div class="note">* Campos obligatorios. Captura promedio: 30–40 seg.</div>
+  </section>
+
+  <aside class="card">
+    <h2>Descargas rápidas</h2>
+    <div class="inline">
+      <label class="inline">Fecha:</label>
+      <input id="fecha" type="date" />
+    </div>
+    <div style="margin-top:8px">
+      <label>Sucursal (opcional)</label>
+      <select id="filtroSuc">
+        <option value="">(todas)</option>
+      </select>
+    </div>
+
+    <div class="actions" style="margin-top:10px">
+      <button class="ghost" id="jsonBtn" type="button">Descargar JSON</button>
+      <button class="ghost" id="csvBtn" type="button">Descargar CSV</button>
+    </div>
+    <div class="note">Estos archivos se cargan directo en el ruteador.</div>
+
+    <h2 style="margin-top:16px">Códigos de sucursal</h2>
+    <div class="list" id="links"></div>
+  </aside>
+</main>
+
+<script>
+  // URL vigente de Apps Script
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwClIwDWFHCgMU7mMMPxaJD-jvH1IiuujkLazJnWEb_-7GyJDPBt2Csbn8hcUO5Pe1zBQ/exec";
+
+  // Catálogo de sucursales
+  const SUCURSALES = {
+    "MEXN":"México Nuevo","SANC":"San Cristóbal","BODG":"Bodegas","TREJ":"Trejo","MAQS":"Maquinas",
+    "PION":"Pioneros","TLAZ":"Tlazala","CHIM":"Chimalpa","CUSP":"Cúspide","ZAC":"Zacatenco",
+    "AVEN":"Avenida","B2B":"B2B","MX68":"Mexico 68"
+  };
+
+  let sucursalCode = null;
+  const $ = (id)=>document.getElementById(id);
+
+  function pintarTabs(){
+    const cont = $("tabs"); cont.innerHTML = "";
+    Object.entries(SUCURSALES).forEach(([code,name])=>{
+      const b=document.createElement("button");
+      b.className="tab"; b.textContent=`${name} — ${code}`;
+      b.onclick=()=>seleccionarSucursal(code);
+      cont.appendChild(b);
+    });
+  }
+
+  function seleccionarSucursal(code){
+    sucursalCode=code;
+    $("sucTag").textContent=`${SUCURSALES[code]} — ${code}`;
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    const idx=Object.keys(SUCURSALES).indexOf(code);
+    const tab=document.querySelectorAll(".tab")[idx]; if(tab) tab.classList.add("active");
+    if($("rememberChk").checked){ try{ localStorage.setItem("peolsa_sucursal_sel",code);}catch(e){} }
+  }
+
+  function cargarSucursalRecordada(){
+    try{
+      const saved=localStorage.getItem("peolsa_sucursal_sel");
+      if(saved && SUCURSALES[saved]){ $("rememberChk").checked=true; seleccionarSucursal(saved); }
+    }catch(e){}
+  }
+
+  // Fecha por defecto: hoy
+  $("fecha").valueAsDate = new Date();
+
+  function llenarListados(){
+    const filtro=$("filtroSuc"), links=$("links");
+    Object.entries(SUCURSALES).forEach(([code,name])=>{
+      const opt=document.createElement("option"); opt.value=code; opt.textContent=`${name} — ${code}`; filtro.appendChild(opt);
+      const row=document.createElement("div"); row.className="row"; row.innerHTML=`<div><strong>${name}</strong><div class="muted">${code}</div></div>`; links.appendChild(row);
+    });
+  }
+
+  function toast(ok=true,msg=null){
+    const box=ok?$("ok"):$("err");
+    box.textContent=msg||(ok?"✅ Pedido registrado. ¡Listo!":"⚠️ No se pudo registrar.");
+    box.style.display="block"; setTimeout(()=>box.style.display="none",3000);
+  }
+
+  function limpiar(){
+    $("cliente").value=""; $("telefono").value=""; $("direccion").value="";
+    $("cp").value=""; $("recoleccion").value=""; $("obs").value="";
+    $("cliente").focus();
+  }
+  $("limpiar").onclick=limpiar;
+
+  // Enviar (no-cors para evitar bloqueo CORS; no se lee la respuesta)
+  $("enviar").onclick = async () => {
+    if(!sucursalCode){ toast(false,"⚠️ Selecciona primero la sucursal en la parte superior."); return; }
+
+    const payload = {
+      sucursal_code: sucursalCode,
+      sucursal_name: SUCURSALES[sucursalCode],
+      cliente: $("cliente").value.trim(),
+      telefono: $("telefono").value.trim().replace(/\s+/g,""),
+      direccion: $("direccion").value.trim(),
+      cp: $("cp").value.trim(),
+      recoleccion: $("recoleccion").value,
+      observaciones: $("obs").value.trim()
+    };
+
+    if(!payload.cliente || !payload.telefono || !payload.direccion || !payload.cp || !payload.recoleccion){
+      toast(false,"⚠️ Completa los campos obligatorios."); return;
+    }
+    if(!/^\d{5}$/.test(payload.cp)){ toast(false,"⚠️ CP inválido (5 dígitos)."); return; }
+    if(!/^\d{10}$/.test(payload.telefono)){ toast(false,"⚠️ Teléfono debe tener 10 dígitos."); return; }
+
+    try{
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors", // 👈 evita CORS; la respuesta es opaca
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
+      // Como la respuesta es 'opaque', no se puede leer; asumimos éxito:
+      toast(true, "✅ Pedido registrado. ¡Listo!");
+      limpiar();
+
+    }catch(e){
+      console.error("Fallo al enviar:", e);
+      toast(false, "⚠️ No se pudo registrar. Revisa tu conexión e intenta de nuevo.");
+    }
+  };
+
+  // Descargas
+  function buildExportURL(fmt){
+    const d=$("fecha").value, suc=$("filtroSuc").value;
+    const qp=new URLSearchParams({ export: fmt||"json", date:d });
+    if(suc) qp.set("sucursal",suc);
+    return `${SCRIPT_URL}?${qp.toString()}`;
+  }
+  $("jsonBtn").onclick=()=>window.open(buildExportURL("json"),"_blank");
+  $("csvBtn").onclick=()=>window.open(buildExportURL("csv"),"_blank");
+
+  // Init
+  pintarTabs();
+  cargarSucursalRecordada();
+  llenarListados();
+</script>
+</body>
+</html>
