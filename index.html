@@ -17,7 +17,7 @@
       width:100%; padding:10px; border-radius:10px; border:1px solid #2a3b85; background:#0b123a; color:var(--ink); font-size:14px;
     }
     textarea{min-height:80px; resize:vertical}
-   .grid{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
     .actions{display:flex; gap:10px; margin-top:12px}
     button{padding:10px 14px; border-radius:10px; border:0; cursor:pointer; font-weight:700}
     .primary{background:var(--accent)}
@@ -42,8 +42,7 @@
 <header><h1>Captura de pedidos — Pinturas Peolsa</h1></header>
 
 <main>
-  <form id="pedidoForm">
-    <section class="card">
+  <section class="card">
     <h2>Selecciona sucursal</h2>
     <div class="tabs" id="tabs"></div>
     <div class="remember">
@@ -86,15 +85,14 @@
     <label>Observaciones</label>
     <textarea id="obs" placeholder="Referencias, rangos de horario, etc. (opcional)"></textarea>
 
-      <div class="actions">
-        <button class="primary" id="enviar" type="submit">Enviar pedido</button>
-        <button class="ghost" id="limpiar" type="button">Limpiar</button>
-      </div>
-      <div id="ok" class="ok">✅ Pedido registrado. ¡Listo!</div>
-      <div id="err" class="err">⚠️ No se pudo registrar. Revisa tu conexión o intenta de nuevo.</div>
-      <div class="note">* Campos obligatorios. Captura promedio: 30–40 seg.</div>
-    </section>
-  </form>
+    <div class="actions">
+      <button class="primary" id="enviar" type="button">Enviar pedido</button>
+      <button class="ghost" id="limpiar" type="button">Limpiar</button>
+    </div>
+    <div id="ok" class="ok">✅ Pedido registrado. ¡Listo!</div>
+    <div id="err" class="err">⚠️ No se pudo registrar. Revisa tu conexión o intenta de nuevo.</div>
+    <div class="note">* Campos obligatorios. Captura promedio: 30–40 seg.</div>
+  </section>
 
   <aside class="card">
     <h2>Descargas rápidas</h2>
@@ -120,7 +118,46 @@
   </aside>
 </main>
 
-@@ -161,80 +163,81 @@
+<script>
+  // URL vigente de Apps Script
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwClIwDWFHCgMU7mMMPxaJD-jvH1IiuujkLazJnWEb_-7GyJDPBt2Csbn8hcUO5Pe1zBQ/exec";
+
+  // Catálogo de sucursales
+  const SUCURSALES = {
+    "MEXN":"México Nuevo","SANC":"San Cristóbal","BODG":"Bodegas","TREJ":"Trejo","MAQS":"Maquinas",
+    "PION":"Pioneros","TLAZ":"Tlazala","CHIM":"Chimalpa","CUSP":"Cúspide","ZAC":"Zacatenco",
+    "AVEN":"Avenida","B2B":"B2B","MX68":"Mexico 68"
+  };
+
+  let sucursalCode = null;
+  const $ = (id)=>document.getElementById(id);
+
+  function pintarTabs(){
+    const cont = $("tabs"); cont.innerHTML = "";
+    Object.entries(SUCURSALES).forEach(([code,name])=>{
+      const b=document.createElement("button");
+      b.className="tab"; b.textContent=`${name} — ${code}`;
+      b.onclick=()=>seleccionarSucursal(code);
+      cont.appendChild(b);
+    });
+  }
+
+  function seleccionarSucursal(code){
+    sucursalCode=code;
+    $("sucTag").textContent=`${SUCURSALES[code]} — ${code}`;
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    const idx=Object.keys(SUCURSALES).indexOf(code);
+    const tab=document.querySelectorAll(".tab")[idx]; if(tab) tab.classList.add("active");
+    if($("rememberChk").checked){ try{ localStorage.setItem("peolsa_sucursal_sel",code);}catch(e){} }
+  }
+
+  function cargarSucursalRecordada(){
+    try{
+      const saved=localStorage.getItem("peolsa_sucursal_sel");
+      if(saved && SUCURSALES[saved]){ $("rememberChk").checked=true; seleccionarSucursal(saved); }
+    }catch(e){}
+  }
+
   // Fecha por defecto: hoy
   $("fecha").valueAsDate = new Date();
 
@@ -146,8 +183,7 @@
   $("limpiar").onclick=limpiar;
 
   // Enviar (no-cors para evitar bloqueo CORS; no se lee la respuesta)
-  $("pedidoForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
+  $("enviar").onclick = async () => {
     if(!sucursalCode){ toast(false,"⚠️ Selecciona primero la sucursal en la parte superior."); return; }
 
     const payload = {
@@ -183,7 +219,7 @@
       console.error("Fallo al enviar:", e);
       toast(false, "⚠️ No se pudo registrar. Revisa tu conexión e intenta de nuevo.");
     }
-  });
+  };
 
   // Descargas
   function buildExportURL(fmt){
