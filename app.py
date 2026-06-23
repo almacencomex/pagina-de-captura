@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from streamlit_gsheets import GSheetsConnection
 
 st.set_page_config(page_title="Almacén Comex", layout="wide")
+conn = st.connection("gsheets", type="gsheets")
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 
