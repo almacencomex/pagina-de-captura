@@ -1,31 +1,48 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
-from streamlit_gsheets import GSheetsConnection
+import gspread
+from google.oauth2.service_account import Credentials
+import json
 
 st.set_page_config(page_title="Almacén Comex - Control de Reparto", layout="wide")
 
-# CONFIGURACIÓN DE SEGURIDAD: Cambia aquí la contraseña del coordinador
+# CONFIGURACIÓN DE SEGURIDAD
 CLAVE_COORDINADOR = "Comex2026"
+LINK_HOJA = "https://docs.google.com/spreadsheets/d/1mA66vFR6o-IuB8fu3VumD4QQrhl85Zwt3hZlFfpR6wU/edit?gid=0#gid=0"
 
-# Nombre exacto de tu hoja de cálculo en Google Drive y la pestaña
-NOMBRE_HOJA = "https://docs.google.com/spreadsheets/d/1mA66vFR6o-IuB8fu3VumD4QQrhl85Zwt3hZlFfpR6wU/edit?gid=0#gid=0"
-NOMBRE_PESTANA = "Captura Pedidos"
+# Autenticación directa y estable con Google
+try:
+    cred_dict = json.loads(st.secrets["google_credentials"])
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+    creds = Credentials.from_service_account_info(cred_dict, scopes=scopes)
+    client = gspread.authorize(creds)
+except Exception as e:
+    st.error("Error al leer la llave digital. Revisa los secretos en Streamlit.")
 
-# Conexión automática usando los secretos que guardamos
-conn = st.connection("gsheets", type=GSheetsConnection)
+def obtener_hoja():
+    return client.open_by_url(LINK_HOJA).worksheet("Captura Pedidos")
 
 def cargar_datos():
     try:
-        # Intenta leer los datos en tiempo real de Google Sheets
-        return conn.read(spreadsheet=NOMBRE_HOJA, worksheet=NOMBRE_PESTANA, ttl="0s")
-    except:
-        # Si está vacía o hay error, estructura las columnas base
+        hoja = obtener_hoja()
+        records = hoja.get_all_records()
+        if not records:
+            return pd.DataFrame(columns=['Folio', 'Fecha', 'Hora Pedido', 'Sucursal', 'Cliente', 'Telefono', 'Direccion', 'Colonia', 'Codigo Postal', 'Importe', 'Tipo Pedido', 'Prioridad', 'Repartidor', 'Estado', 'Notas', 'Hora Salida', 'Hora Entrega'])
+        return pd.DataFrame(records)
+    except Exception as e:
         return pd.DataFrame(columns=['Folio', 'Fecha', 'Hora Pedido', 'Sucursal', 'Cliente', 'Telefono', 'Direccion', 'Colonia', 'Codigo Postal', 'Importe', 'Tipo Pedido', 'Prioridad', 'Repartidor', 'Estado', 'Notas', 'Hora Salida', 'Hora Entrega'])
 
 def guardar_datos(df_actualizado):
-    # Envía los datos limpios directamente a la nube de Google
-    conn.update(spreadsheet=NOMBRE_HOJA, worksheet=NOMBRE_PESTANA, data=df_actualizado)
+    hoja = obtener_hoja()
+    hoja.clear()
+    # Convertir vacíos a formato que Google Sheets acepte
+    df_actualizado = df_actualizado.fillna("")
+    datos = [df_actualizado.columns.values.tolist()] + df_actualizado.values.tolist()
+    hoja.update(range_name="A1", values=datos)
 
 SUCURSALES = ['Avenida', 'Pioneros', 'Chimalpa', 'Trejo', 'San Cristóbal', 'Bodegas', 'Máquinas', 'B2B', 'México Nuevo', 'Lindavista', 'Colinas', 'Tlazala', 'Mezquite']
 TIPOS_PEDIDO = ['Recurrente', 'Perimetro suc', 'Traspaso tiendas', 'Complemento entrega', 'Garantia/Reposicion', 'Entrega parcial', 'Recoleccion kroma', 'Ruta de traspasos', 'B2B', 'Foraneo']
@@ -60,7 +77,6 @@ with tab1:
                 st.error("Por favor, llena los campos obligatorios (Cliente, Teléfono, Dirección y Colonia).")
             else:
                 df_actual = cargar_datos()
-                # Eliminar filas completamente vacías si las hay
                 df_actual = df_actual.dropna(how='all')
                 
                 nuevo_id = len(df_actual) + 1
@@ -97,7 +113,6 @@ with tab2:
             with col_filtro2:
                 estado_filtro = st.multiselect("Filtrar por Estado:", ESTADOS, default=['Pendiente', 'Preparando', 'Asignado', 'En Ruta'])
             
-            # Asegurar que la columna Fecha se lea como texto para el filtro
             df_coordinador['Fecha'] = df_coordinador['Fecha'].astype(str)
             df_filtrado = df_coordinador[df_coordinador['Fecha'] == fecha_str]
             df_filtrado = df_filtrado[df_filtrado['Estado'].isin(estado_filtro)]
@@ -118,7 +133,6 @@ with tab2:
                 
                 actualizar_btn = st.form_submit_button("Guardar Cambios de Logística")
                 if actualizar_btn and folio_a_editar != "No hay folios en esta fecha":
-                    # Localizar el índice correcto en el dataframe general para actualizar
                     idx = df_coordinador[df_coordinador['Folio'] == folio_a_editar].index[0]
                     df_coordinador.at[idx, 'Repartidor'] = repartidor_asignado
                     df_coordinador.at[idx, 'Estado'] = nuevo_estado
