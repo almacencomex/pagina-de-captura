@@ -3,9 +3,8 @@ import pandas as pd
 from datetime import datetime
 
 st.set_page_config(page_title="Almacén Comex", layout="wide")
-conn = st.connection("gsheets", type="gsheets")
 
-conn = st.connection("gsheets", type=GSheetsConnection)
+conn = st.connection("gsheets", type="gsheets")
 
 def cargar_datos():
     return conn.read(spreadsheet="Base_Entregas_Comex", worksheet="Captura Pedidos")
