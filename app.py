@@ -9,7 +9,7 @@ st.set_page_config(page_title="Almacén Comex - Control de Reparto", layout="wid
 
 # CONFIGURACIÓN DE SEGURIDAD
 CLAVE_COORDINADOR = "Comex2026"
-LINK_HOJA = "https://docs.google.com/spreadsheets/d/1mA66vFR6o-IuB8fu3VumD4QQrhl85Zwt3hZlFfpR6wU"
+LINK_HOJA = "https://docs.google.com/spreadsheets/d/1qnZGiiCG6Y82YS-NSU05AHQ9VO3b_7EAlMKpmDBIc2k"
 
 # Autenticación directa y estable con Google
 try:
