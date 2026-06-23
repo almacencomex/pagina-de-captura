@@ -9,7 +9,7 @@ st.set_page_config(page_title="Almacén Comex - Control de Reparto", layout="wid
 CLAVE_COORDINADOR = "Comex2026"
 
 # Nombre exacto de tu hoja de cálculo en Google Drive y la pestaña
-NOMBRE_HOJA = "Base_Entregas_Comex"
+NOMBRE_HOJA = "https://docs.google.com/spreadsheets/d/1mA66vFR6o-IuB8fu3VumD4QQrhl85Zwt3hZlFfpR6wU/edit?gid=0#gid=0"
 NOMBRE_PESTANA = "Captura Pedidos"
 
 # Conexión automática usando los secretos que guardamos
