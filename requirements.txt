@@ -1,2 +1,3 @@
-[connections.gsheets]
-spreadsheet = "Base_Entregas_Comex"
+streamlit
+pandas
+streamlit-gsheets
