@@ -1,22 +1,21 @@
 import streamlit as st
 import pandas as pd
+import requests
 
 st.set_page_config(layout="wide")
 
-url = "https://docs.google.com/spreadsheets/d/1qnZGiiCG6Y82YS-NSU05AHQ9VO3b_7EAlMKpmDBIc2k"
-csv_url = url.replace('/edit#gid=', '/export?format=csv&gid=')
+url_script = "https://script.google.com/macros/s/AKfycbyn0UNAvgbef9yeQm7aydTAmY7u3Pwdrh74H6YfeEvNVLEFBiwoL-xXqN7MdFseMFAj/exec"
 
 st.title("Sistema de Pedidos")
 
-if st.button("Cargar Datos"):
-    try:
-        df = pd.read_csv(csv_url)
-        st.dataframe(df)
-    except:
-        st.error("No pude leer la hoja. Asegúrate de que es pública.")
-
-st.subheader("Captura Nuevo Pedido")
 with st.form("pedido"):
     cliente = st.text_input("Cliente")
     if st.form_submit_button("Enviar"):
-        st.write("Pedido enviado a:", cliente)
+        try:
+            response = requests.post(url_script, json={"cliente": cliente})
+            if response.status_code == 200:
+                st.success("Pedido enviado correctamente a la base de datos.")
+            else:
+                st.error("Error al enviar el pedido.")
+        except Exception as e:
+            st.error(f"Error: {e}")
