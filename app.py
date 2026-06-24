@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(layout="wide")
 
-url = "TU_URL_AQUI"
+url = "https://docs.google.com/spreadsheets/d/1qnZGiiCG6Y82YS-NSU05AHQ9VO3b_7EAlMKpmDBIc2k"
 csv_url = url.replace('/edit#gid=', '/export?format=csv&gid=')
 
 st.title("Sistema de Pedidos")
