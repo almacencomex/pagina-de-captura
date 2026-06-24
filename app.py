@@ -2,11 +2,10 @@ import streamlit as st
 import requests
 import pandas as pd
 
-st.set_page_config(layout="wide")
+st.set_page_config(page_title="Almacén Comex", layout="wide")
 
 url_script = "https://script.google.com/macros/s/AKfycbyZXFo8tWgYxm8Az37TNbvfHX0Ssh_Xlku0WpP0Kbf9KSRmoUVI93EnjenCZ4xBzvLU/exec"
-url_csv = "https://docs.google.com/spreadsheets/d/1qnZGiiCG6Y82YS-NSU05AHQ9VO3b_7EAlMKpmDBIc2k/edit?gid=0#gid=0"
-csv_url = url_csv.replace('/edit#gid=', '/export?format=csv&gid=')
+csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtbtQYSmR83sJ4BbW4QzPSXvm0eVf9rpv4e8IAZPjvz9ZQS9ZYZoUkN4iZAIHtyz588Lud5jpPTa2D/pub?output=csv"
 
 tab1, tab2 = st.tabs(["🏢 Captura", "👨‍💻 Panel Coordinador"])
 
@@ -15,7 +14,7 @@ with tab1:
     with st.form("pedido", clear_on_submit=True):
         col1, col2 = st.columns(2)
         with col1:
-            sucursal = st.selectbox("Sucursal", ['Avenida', 'Pioneros', 'Chimalpa'])
+            sucursal = st.selectbox("Sucursal", ['Avenida', 'Pioneros', 'Chimalpa', 'Trejo', 'San Cristóbal', 'Bodegas', 'Máquinas', 'B2B', 'México Nuevo', 'Lindavista', 'Colinas', 'Tlazala', 'Mezquite'])
             cliente = st.text_input("Cliente")
             telefono = st.text_input("Teléfono")
             direccion = st.text_input("Dirección")
@@ -23,14 +22,15 @@ with tab1:
             cp = st.text_input("Código Postal")
         with col2:
             importe = st.number_input("Importe ($)", min_value=0.0)
-            tipo = st.selectbox("Tipo", ['Recurrente', 'Traspaso'])
+            tipo = st.selectbox("Tipo Pedido", ['Recurrente', 'Perimetro suc', 'Traspaso tiendas', 'Complemento entrega', 'Garantia/Reposicion', 'Entrega parcial', 'Recoleccion kroma', 'Ruta de traspasos', 'B2B', 'Foraneo'])
             prioridad = st.selectbox("Prioridad", ['A', 'B', 'C'])
             notas = st.text_area("Notas")
         
         if st.form_submit_button("Enviar Pedido"):
             datos = {"sucursal": sucursal, "cliente": cliente, "telefono": telefono, "direccion": direccion, "colonia": colonia, "cp": cp, "importe": importe, "tipo": tipo, "prioridad": prioridad, "notas": notas}
-            requests.post(url_script, json=datos)
-            st.success("Pedido enviado.")
+            resp = requests.post(url_script, json=datos)
+            if resp.status_code == 200:
+                st.success("Pedido enviado correctamente.")
 
 with tab2:
     st.header("Panel de Control")
@@ -44,4 +44,4 @@ with tab2:
             c3.metric("Entregados", len(df[df['Estado'] == 'Entregado']))
             st.dataframe(df, use_container_width=True)
         except:
-            st.error("Error al cargar datos. Verifica que la hoja esté pública.")
+            st.error("Error al cargar datos. Verifica la URL CSV y que la hoja esté publicada.")
