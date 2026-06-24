@@ -4,8 +4,7 @@ import pandas as pd
 
 st.set_page_config(layout="wide")
 
-url_script = "https://script.google.com/macros/s/AKfycbyZXFo8tWgYxm8Az37TNbvfHX0Ssh_Xlku0WpP0Kbf9KSRmoUVI93EnjenCZ4xBzvLU/exec
-"
+url_script = "https://script.google.com/macros/s/AKfycbyZXFo8tWgYxm8Az37TNbvfHX0Ssh_Xlku0WpP0Kbf9KSRmoUVI93EnjenCZ4xBzvLU/exec"
 url_csv = "https://docs.google.com/spreadsheets/d/1qnZGiiCG6Y82YS-NSU05AHQ9VO3b_7EAlMKpmDBIc2k/edit?gid=0#gid=0"
 csv_url = url_csv.replace('/edit#gid=', '/export?format=csv&gid=')
 
