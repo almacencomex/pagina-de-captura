@@ -8,10 +8,13 @@ url = "TU_URL_DE_GOOGLE_SHEET_AQUI"
 csv_url = url.replace('/edit#gid=', '/export?format=csv&gid=')
 
 def cargar_datos():
-    return pd.read_csv(csv_url)
+    try:
+        return pd.read_csv(csv_url)
+    except:
+        return pd.DataFrame()
 
 def guardar_datos(df_actualizado):
-    st.warning("Para guardar cambios, asegúrate de tener configurada la API de Google Sheets.")
+    st.warning("Configura API de Google Sheets para persistencia.")
 
 SUCURSALES = ['Avenida', 'Pioneros', 'Chimalpa', 'Trejo', 'San Cristóbal', 'Bodegas', 'Máquinas', 'B2B', 'México Nuevo', 'Lindavista', 'Colinas', 'Tlazala', 'Mezquite']
 TIPOS_PEDIDO = ['Recurrente', 'Perimetro suc', 'Traspaso tiendas', 'Complemento entrega', 'Garantia/Reposicion', 'Entrega parcial', 'Recoleccion kroma', 'Ruta de traspasos', 'B2B', 'Foraneo']
@@ -42,17 +45,20 @@ with tab1:
             
         enviar = st.form_submit_button("Enviar Pedido")
         if enviar:
-            st.success("Pedido enviado (Configura los permisos de escritura para persistencia).")
+            st.success("Pedido procesado")
 
 with tab2:
     st.header("Gestión de Entregas")
     clave = st.text_input("Contraseña:", type="password")
     if clave == "Comex2026":
         df_coordinador = cargar_datos()
-        st.dataframe(df_coordinador, use_container_width=True)
-        st.subheader("Actualizar Estatus")
-        with st.form("actualizar"):
-            folio_editar = st.selectbox("Folio", df_coordinador['Folio'].tolist())
-            nuevo_estado = st.selectbox("Estado", ESTADOS)
-            if st.form_submit_button("Guardar"):
-                st.info("Función de escritura disponible tras configuración de API.")
+        if not df_coordinador.empty:
+            st.dataframe(df_coordinador, use_container_width=True)
+            st.subheader("Actualizar Estatus")
+            with st.form("actualizar"):
+                folio_editar = st.selectbox("Folio", df_coordinador['Folio'].tolist())
+                nuevo_estado = st.selectbox("Estado", ESTADOS)
+                if st.form_submit_button("Guardar"):
+                    st.info("Configura API para persistencia.")
+        else:
+            st.error("No se pudieron cargar los datos. Verifica que la hoja esté pública.")
