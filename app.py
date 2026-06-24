@@ -39,7 +39,8 @@ with tab1:
 with tab2:
     st.header("Gestión de Entregas")
     clave = st.text_input("Contraseña", type="password")
-  if clave == "Comex2026":
+    
+    if clave == "Comex2026":
         df = pd.read_csv(csv_url)
         f = st.selectbox("Folio a gestionar", df['Folio'].unique())
         c_nuevo = st.selectbox("Asignar Chofer", ['Juan', 'Pedro', 'Luis'])
@@ -58,6 +59,10 @@ with tab2:
                 st.error("Error al conectar.")
         
         st.dataframe(df, use_container_width=True)
+        
+        if st.button("🔄 Refrescar datos del panel"):
+            st.rerun()
+            
     else:
         st.warning("Ingresa la contraseña para gestionar.")
         
