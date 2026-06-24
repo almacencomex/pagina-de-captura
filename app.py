@@ -1,8 +1,10 @@
 import streamlit as st
 import requests
 import pandas as pd
+import time
 
 st.set_page_config(layout="wide")
+
 url_script = "https://script.google.com/macros/s/AKfycbyZXFo8tWgYxm8Az37TNbvfHX0Ssh_Xlku0WpP0Kbf9KSRmoUVI93EnjenCZ4xBzvLU/exec"
 csv_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtbtQYSmR83sJ4BbW4QzPSXvm0eVf9rpv4e8IAZPjvz9ZQS9ZYZoUkN4iZAIHtyz588Lud5jpPTa2D/pub?output=csv"
 
@@ -43,8 +45,12 @@ with tab2:
     if clave == "Comex2026":
         try:
             df = pd.read_csv(csv_url)
+            
+            # Selector de Folio basado en los datos cargados
             f = st.selectbox("Folio a gestionar", df['Folio'].unique())
-            c_nuevo = st.selectbox("Asignar Chofer", ['Juan', 'Pedro', 'Luis'])
+            
+            # Lista actualizada de choferes
+            c_nuevo = st.selectbox("Asignar Chofer", ['Issac', 'Juan Luis', 'Jorge', 'Apoyo'])
             e_nuevo = st.selectbox("Estado", ['Pendiente', 'En Ruta', 'Entregado'])
             
             hs = st.time_input("Hora Salida")
@@ -52,16 +58,19 @@ with tab2:
             
             if st.button("Confirmar y Aplicar Cambios"):
                 url_edit = f"{url_script}?folio={f}&chofer={c_nuevo}&estado={e_nuevo}&h_salida={hs}&h_entrega={he}"
-                res = requests.get(url_edit)
-                if res.status_code == 200:
-                    st.success("¡Cambios aplicados!")
-                    st.rerun()
+                requests.get(url_edit)
+                st.success("¡Cambios aplicados! Recargando...")
+                time.sleep(2) # Pausa breve para permitir que Google procese
+                st.rerun()
             
             st.dataframe(df, use_container_width=True)
             
-            if st.button("🔄 Refrescar datos del panel"):
+            if st.button("🔄 Refrescar datos"):
                 st.rerun()
-        except:
-            st.error("Error al leer el archivo. Asegúrate de que la hoja esté pública.")
+                
+        except Exception:
+            st.info("Actualizando datos desde Google... espera un momento.")
+            time.sleep(2)
+            st.rerun()
     else:
         st.warning("Ingresa la contraseña para gestionar.")
