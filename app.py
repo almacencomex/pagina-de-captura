@@ -41,29 +41,27 @@ with tab2:
     clave = st.text_input("Contraseña", type="password")
     
     if clave == "Comex2026":
-        df = pd.read_csv(csv_url)
-        f = st.selectbox("Folio a gestionar", df['Folio'].unique())
-        c_nuevo = st.selectbox("Asignar Chofer", ['Juan', 'Pedro', 'Luis'])
-        e_nuevo = st.selectbox("Estado", ['Pendiente', 'En Ruta', 'Entregado'])
-        
-        hs = st.time_input("Hora Salida")
-        he = st.time_input("Hora Entrega")
-        
-        if st.button("Confirmar y Aplicar Cambios"):
-            url_edit = f"{url_script}?folio={f}&chofer={c_nuevo}&estado={e_nuevo}&h_salida={hs}&h_entrega={he}"
-            res = requests.get(url_edit)
-            if res.status_code == 200:
-                st.success("¡Cambios aplicados!")
-                st.rerun()
-            else:
-                st.error("Error al conectar.")
-        
-        st.dataframe(df, use_container_width=True)
-        
-        if st.button("🔄 Refrescar datos del panel"):
-            st.rerun()
+        try:
+            df = pd.read_csv(csv_url)
+            f = st.selectbox("Folio a gestionar", df['Folio'].unique())
+            c_nuevo = st.selectbox("Asignar Chofer", ['Juan', 'Pedro', 'Luis'])
+            e_nuevo = st.selectbox("Estado", ['Pendiente', 'En Ruta', 'Entregado'])
             
+            hs = st.time_input("Hora Salida")
+            he = st.time_input("Hora Entrega")
+            
+            if st.button("Confirmar y Aplicar Cambios"):
+                url_edit = f"{url_script}?folio={f}&chofer={c_nuevo}&estado={e_nuevo}&h_salida={hs}&h_entrega={he}"
+                res = requests.get(url_edit)
+                if res.status_code == 200:
+                    st.success("¡Cambios aplicados!")
+                    st.rerun()
+            
+            st.dataframe(df, use_container_width=True)
+            
+            if st.button("🔄 Refrescar datos del panel"):
+                st.rerun()
+        except:
+            st.error("Error al leer el archivo. Asegúrate de que la hoja esté pública.")
     else:
         st.warning("Ingresa la contraseña para gestionar.")
-        
-        st.dataframe(df, use_container_width=True)
