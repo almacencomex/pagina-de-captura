@@ -27,15 +27,22 @@ with tab1:
 with tab2:
     st.header("Gestión de Entregas")
     clave = st.text_input("Contraseña", type="password")
+    
     if clave == "Comex2026":
-        df = pd.read_csv(csv_url)
-        f = st.selectbox("Folio a gestionar", df['Folio'].unique())
-        c_nuevo = st.selectbox("Asignar Chofer", ['Juan', 'Pedro', 'Luis'])
-        e_nuevo = st.selectbox("Estado", ['Pendiente', 'En Ruta', 'Entregado'])
-        hs = st.text_input("H. Salida")
-        he = st.text_input("H. Entrega")
-        
-        if st.button("Actualizar"):
-            url_edit = f"{url_script}?folio={f}&chofer={c_nuevo}&estado={e_nuevo}&h_salida={hs}&h_entrega={he}"
-            st.link_button("Confirmar cambios", url_edit)
-            st.dataframe(df)
+        try:
+            df = pd.read_csv(csv_url)
+            f = st.selectbox("Folio a gestionar", df['Folio'].unique())
+            c_nuevo = st.selectbox("Asignar Chofer", ['Juan', 'Pedro', 'Luis'])
+            e_nuevo = st.selectbox("Estado", ['Pendiente', 'En Ruta', 'Entregado'])
+            hs = st.text_input("H. Salida")
+            he = st.text_input("H. Entrega")
+            
+            if st.button("Actualizar"):
+                url_edit = f"{url_script}?folio={f}&chofer={c_nuevo}&estado={e_nuevo}&h_salida={hs}&h_entrega={he}"
+                st.link_button("Confirmar cambios en Google", url_edit)
+            
+            st.dataframe(df, use_container_width=True)
+        except:
+            st.error("Error al cargar datos. Verifica la URL CSV y que la hoja esté publicada.")
+    else:
+        st.warning("Por favor, ingresa la contraseña para acceder al panel de gestión.")
