@@ -57,5 +57,10 @@ with tab2:
                 st.rerun()
             else:
                 st.error("Error al conectar con Google.")
+                # Botón para recargar datos desde el CSV
+        if st.button("🔄 Refrescar datos del panel"):
+            st.rerun()
+            
+        st.dataframe(df, use_container_width=True)
         
         st.dataframe(df, use_container_width=True)
