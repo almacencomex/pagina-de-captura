@@ -42,6 +42,15 @@ with tab2:
             c1.metric("Pendientes", len(df[df['Estado'] == 'Pendiente']))
             c2.metric("En Ruta", len(df[df['Estado'] == 'En Ruta']))
             c3.metric("Entregados", len(df[df['Estado'] == 'Entregado']))
+            
+            st.subheader("Actualizar Estado")
+            col_f, col_e = st.columns(2)
+            folio_a_editar = col_f.selectbox("Selecciona Folio", df['Folio'].unique())
+            nuevo_status = col_e.selectbox("Nuevo Estado", ['Pendiente', 'En Ruta', 'Entregado'])
+            
+            url_edit = f"{url_script}?folio={folio_a_editar}&estado={nuevo_status}"
+            st.link_button("Confirmar cambio de estado en Google", url_edit)
+            
             st.dataframe(df, use_container_width=True)
         except:
             st.error("Error al cargar datos. Verifica la URL CSV y que la hoja esté publicada.")
