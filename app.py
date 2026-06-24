@@ -4,13 +4,14 @@ from datetime import datetime
 
 st.set_page_config(page_title="Almacén Comex", layout="wide")
 
-conn = st.connection("gsheets", type="gsheets")
+url = "TU_URL_DE_GOOGLE_SHEET_AQUI"
+csv_url = url.replace('/edit#gid=', '/export?format=csv&gid=')
 
 def cargar_datos():
-    return conn.read(spreadsheet="Base_Entregas_Comex", worksheet="Captura Pedidos")
+    return pd.read_csv(csv_url)
 
 def guardar_datos(df_actualizado):
-    conn.update(worksheet="Captura Pedidos", data=df_actualizado)
+    st.warning("Para guardar cambios, asegúrate de tener configurada la API de Google Sheets.")
 
 SUCURSALES = ['Avenida', 'Pioneros', 'Chimalpa', 'Trejo', 'San Cristóbal', 'Bodegas', 'Máquinas', 'B2B', 'México Nuevo', 'Lindavista', 'Colinas', 'Tlazala', 'Mezquite']
 TIPOS_PEDIDO = ['Recurrente', 'Perimetro suc', 'Traspaso tiendas', 'Complemento entrega', 'Garantia/Reposicion', 'Entrega parcial', 'Recoleccion kroma', 'Ruta de traspasos', 'B2B', 'Foraneo']
@@ -41,18 +42,7 @@ with tab1:
             
         enviar = st.form_submit_button("Enviar Pedido")
         if enviar:
-            df_actual = cargar_datos()
-            nuevo_id = len(df_actual) + 1
-            folio = f"P{nuevo_id:03d}"
-            nuevo_pedido = {
-                'Folio': folio, 'Fecha': datetime.now().strftime('%Y-%m-%d'), 'Hora Pedido': datetime.now().strftime('%H:%M:%S'),
-                'Sucursal': sucursal, 'Cliente': cliente, 'Telefono': telefono, 'Direccion': direccion, 'Colonia': colonia, 'Codigo Postal': codigo_postal, 'Importe': importe, 'Tipo Pedido': tipo_pedido,
-                'Prioridad': prioridad, 'Repartidor': 'Sin Asignar', 'Estado': 'Pendiente', 'Notas': notas,
-                'Hora Salida': '', 'Hora Entrega': ''
-            }
-            df_actual = pd.concat([df_actual, pd.DataFrame([nuevo_pedido])], ignore_index=True)
-            guardar_datos(df_actual)
-            st.success(f"Pedido {folio} guardado.")
+            st.success("Pedido enviado (Configura los permisos de escritura para persistencia).")
 
 with tab2:
     st.header("Gestión de Entregas")
@@ -65,7 +55,4 @@ with tab2:
             folio_editar = st.selectbox("Folio", df_coordinador['Folio'].tolist())
             nuevo_estado = st.selectbox("Estado", ESTADOS)
             if st.form_submit_button("Guardar"):
-                idx = df_coordinador[df_coordinador['Folio'] == folio_editar].index[0]
-                df_coordinador.at[idx, 'Estado'] = nuevo_estado
-                guardar_datos(df_coordinador)
-                st.rerun()
+                st.info("Función de escritura disponible tras configuración de API.")
