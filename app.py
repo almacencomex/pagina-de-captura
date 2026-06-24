@@ -39,13 +39,12 @@ with tab1:
 with tab2:
     st.header("Gestión de Entregas")
     clave = st.text_input("Contraseña", type="password")
-    if clave == "Comex2026":
+  if clave == "Comex2026":
         df = pd.read_csv(csv_url)
         f = st.selectbox("Folio a gestionar", df['Folio'].unique())
         c_nuevo = st.selectbox("Asignar Chofer", ['Juan', 'Pedro', 'Luis'])
         e_nuevo = st.selectbox("Estado", ['Pendiente', 'En Ruta', 'Entregado'])
         
-        # Selección de horario profesional
         hs = st.time_input("Hora Salida")
         he = st.time_input("Hora Entrega")
         
@@ -53,14 +52,13 @@ with tab2:
             url_edit = f"{url_script}?folio={f}&chofer={c_nuevo}&estado={e_nuevo}&h_salida={hs}&h_entrega={he}"
             res = requests.get(url_edit)
             if res.status_code == 200:
-                st.success("¡Cambios aplicados correctamente!")
+                st.success("¡Cambios aplicados!")
                 st.rerun()
             else:
-                st.error("Error al conectar con Google.")
-                # Botón para recargar datos desde el CSV
-        if st.button("🔄 Refrescar datos del panel"):
-            st.rerun()
-            
+                st.error("Error al conectar.")
+        
         st.dataframe(df, use_container_width=True)
+    else:
+        st.warning("Ingresa la contraseña para gestionar.")
         
         st.dataframe(df, use_container_width=True)
