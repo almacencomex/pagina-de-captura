@@ -13,21 +13,20 @@ with tab1:
     with st.form("pedido", clear_on_submit=True):
         col1, col2 = st.columns(2)
         with col1:
-            sucursal = st.selectbox("Sucursal", ['Avenida', 'Pioneros', 'Chimalpa'])
+            sucursal = st.selectbox("Sucursal", ['Avenida', 'Pioneros', 'Chimalpa', 'Trejo', 'San Cristóbal', 'Bodegas', 'Máquinas', 'B2B', 'México Nuevo', 'Lindavista', 'Colinas', 'Tlazala', 'Mezquite'])
             cliente = st.text_input("Cliente")
             telefono = st.text_input("Teléfono")
         with col2:
             direccion = st.text_input("Dirección")
             importe = st.number_input("Importe ($)", min_value=0.0)
-            tipo = st.selectbox("Tipo Pedido", ['Recurrente', 'Traspaso'])
+            tipo = st.selectbox("Tipo Pedido", ['Recurrente', 'Perimetro suc', 'Traspaso tiendas', 'Complemento entrega', 'Garantia/Reposicion', 'Entrega parcial', 'Recoleccion kroma', 'Ruta de traspasos', 'B2B', 'Foraneo'])
         
         if st.form_submit_button("Enviar Pedido"):
-            # Chofer y horarios se envían vacíos al inicio
             datos = {"sucursal": sucursal, "cliente": cliente, "telefono": telefono, 
                      "direccion": direccion, "importe": importe, "tipo": tipo,
                      "chofer": "Sin asignar", "hora_salida": "", "hora_entrega": ""}
             requests.post(url_script, json=datos)
-            st.success("Pedido registrado.")
+            st.success("Pedido registrado correctamente.")
 
 with tab2:
     st.header("Gestión de Entregas")
