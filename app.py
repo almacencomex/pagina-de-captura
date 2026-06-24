@@ -44,11 +44,18 @@ with tab2:
         f = st.selectbox("Folio a gestionar", df['Folio'].unique())
         c_nuevo = st.selectbox("Asignar Chofer", ['Juan', 'Pedro', 'Luis'])
         e_nuevo = st.selectbox("Estado", ['Pendiente', 'En Ruta', 'Entregado'])
-        hs = st.text_input("Hora Salida")
-        he = st.text_input("Hora Entrega")
         
-        if st.button("Confirmar Asignación"):
+        # Selección de horario profesional
+        hs = st.time_input("Hora Salida")
+        he = st.time_input("Hora Entrega")
+        
+        if st.button("Confirmar y Aplicar Cambios"):
             url_edit = f"{url_script}?folio={f}&chofer={c_nuevo}&estado={e_nuevo}&h_salida={hs}&h_entrega={he}"
-            st.link_button("Aplicar Cambios en Google", url_edit)
+            res = requests.get(url_edit)
+            if res.status_code == 200:
+                st.success("¡Cambios aplicados correctamente!")
+                st.rerun()
+            else:
+                st.error("Error al conectar con Google.")
         
         st.dataframe(df, use_container_width=True)
