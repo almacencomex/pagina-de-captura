@@ -4,7 +4,7 @@ import requests
 
 st.set_page_config(layout="wide")
 
-url_script = "TU_URL_DE_APPS_SCRIPT"
+url_script = "https://script.google.com/macros/s/AKfycbyZXFo8tWgYxm8Az37TNbvfHX0Ssh_Xlku0WpP0Kbf9KSRmoUVI93EnjenCZ4xBzvLU/exec"
 
 st.title("📦 Sistema Interno de Logística - Almacén Comex")
 
