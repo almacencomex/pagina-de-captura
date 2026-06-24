@@ -10,7 +10,7 @@ def cargar_datos():
     return conn.read(spreadsheet="Base_Entregas_Comex", worksheet="Captura Pedidos")
 
 def guardar_datos(df_actualizado):
-    conn.update(spreadsheet="Base_Entregas_Comex", worksheet="Captura Pedidos", data=df_actualizado)
+    conn.update(worksheet="Captura Pedidos", data=df_actualizado)
 
 SUCURSALES = ['Avenida', 'Pioneros', 'Chimalpa', 'Trejo', 'San Cristóbal', 'Bodegas', 'Máquinas', 'B2B', 'México Nuevo', 'Lindavista', 'Colinas', 'Tlazala', 'Mezquite']
 TIPOS_PEDIDO = ['Recurrente', 'Perimetro suc', 'Traspaso tiendas', 'Complemento entrega', 'Garantia/Reposicion', 'Entrega parcial', 'Recoleccion kroma', 'Ruta de traspasos', 'B2B', 'Foraneo']
