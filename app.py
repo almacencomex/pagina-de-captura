@@ -46,10 +46,15 @@ with tab2:
         try:
             df = pd.read_csv(csv_url)
             
-            # Selector de Folio basado en los datos cargados
-            f = st.selectbox("Folio a gestionar", df['Folio'].unique())
+            # --- AQUÍ ESTÁN LOS INDICADORES DE VUELTA ---
+            c1, c2, c3 = st.columns(3)
+            # Asegúrate que los nombres de estado coincidan exactamente con tu hoja
+            c1.metric("Pendientes", len(df[df['Estado'] == 'Pendiente']))
+            c2.metric("En Ruta", len(df[df['Estado'] == 'En Ruta']))
+            c3.metric("Entregados", len(df[df['Estado'] == 'Entregado']))
+            # ---------------------------------------------
             
-            # Lista actualizada de choferes
+            f = st.selectbox("Folio a gestionar", df['Folio'].unique())
             c_nuevo = st.selectbox("Asignar Chofer", ['Issac', 'Juan Luis', 'Jorge', 'Apoyo'])
             e_nuevo = st.selectbox("Estado", ['Pendiente', 'En Ruta', 'Entregado'])
             
@@ -60,7 +65,7 @@ with tab2:
                 url_edit = f"{url_script}?folio={f}&chofer={c_nuevo}&estado={e_nuevo}&h_salida={hs}&h_entrega={he}"
                 requests.get(url_edit)
                 st.success("¡Cambios aplicados! Recargando...")
-                time.sleep(2) # Pausa breve para permitir que Google procese
+                time.sleep(2)
                 st.rerun()
             
             st.dataframe(df, use_container_width=True)
@@ -72,5 +77,7 @@ with tab2:
             st.info("Actualizando datos desde Google... espera un momento.")
             time.sleep(2)
             st.rerun()
+    else:
+        st.warning("Ingresa la contraseña para gestionar.")
     else:
         st.warning("Ingresa la contraseña para gestionar.")
